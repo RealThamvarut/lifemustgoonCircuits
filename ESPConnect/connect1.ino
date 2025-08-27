@@ -65,7 +65,7 @@ void loop() {
         temp = air.readTemperature();
         pressure = air.readPressure();
         humid = air.readHumidity();
-        message = String(dist) + ";" +String(temp);  
+        message = String(dist) + ";" + String(temp);  
         Serial2.println(message);
     }
     else {

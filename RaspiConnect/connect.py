@@ -1,8 +1,15 @@
 import serial
 import time
 
+from supabase import create_client, Client
+
 ser = serial.Serial('/dev/ttyACM0', 115200, timeout=5)
 
+url: str = "https://iafczodqvfosapepeinj.supabase.co"
+key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZmN6b2RxdmZvc2FwZXBlaW5qIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEzMDQ4MywiZXhwIjoyMDcxNzA2NDgzfQ.HfI10kvj1cUUX-Ilp785J5QXyVnSo_A1P5p1UFA8O6I"
+supabase: Client = create_client(url, key)
+
+# cardID = "FA42F380"
 def send_command(cmd):
     if not cmd:
         return
@@ -33,19 +40,33 @@ def print_text(text):
 if __name__ == "__main__":
     time.sleep(1) # รอการเชื่อมต่อ
     while True:
-        commad = input("Enter command (or 'exit' to quit): ").strip()
-        if commad.lower() == 'exit' or commad.lower() == 'quit':
+        command = input("Enter command (or 'exit' to quit): ").strip()
+        if command.lower() == 'exit' or command.lower() == 'quit':
             break
-        
-        send_command(commad)
-        # if commad == "getdata":
-        response = receive_data()
-        if response:
-            print(f"Response: {response}")
-        else :
-            print("No response received.")
-        
-        
+
+        send_command(command)
+        if command == "getdata":
+            response = receive_data()
+
+            if response:
+                print(f"Response: {response}")
+            else :
+                print("No response received.")
+
+            responseList = response.split(";")
+            waterLevel = responseList[0]
+            temperature = responseList[1]
+
+            print("WaterLevel: ", waterLevel)
+            print("Temperature: ", temperature)
+
+            insertTable = (
+                supabase.table("water_tank")
+                .insert({"temperature": temperature, "water_level": waterLevel})
+                .execute()
+            )
+
+            print("Insert successfully")
 
     ser.close()
     print("Connection closed!")
