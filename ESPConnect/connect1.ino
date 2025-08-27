@@ -56,20 +56,20 @@ void loop() {
     Serial.println(command);
     if(command == "activate"){
       digitalWrite(pumpPin, HIGH);
-      Serial.println("PUMP ON");
+      Serial2.println("PUMP ON");
     } else if (command == "deactivate"){
       digitalWrite(pumpPin, LOW);
-      Serial.println("PUMP OFF");
+      Serial2.println("PUMP OFF");
     } else if (command == "getdata"){
         dist = sonar.readDistance();
         temp = air.readTemperature();
         pressure = air.readPressure();
         humid = air.readHumidity();
-        message = "Dist: " + String(dist) + ";" + "Temp: " +String(temp);  
+        message = String(dist) + ";" +String(temp);  
         Serial2.println(message);
     }
     else {
-      Serial2.println("Unknown command: " + command);
+      Serial2.println("Unknown command bro: " + command);
     }
   } 
 }
