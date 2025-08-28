@@ -1,5 +1,6 @@
 #include "AirSensor.h"
 #include "UltraSonic.h"
+#include "PiezoWeight.h"
 
 // #define RX1 44
 // #define TX1 43
@@ -7,16 +8,21 @@
 
 AirSensor air;
 UltraSonic sonar(37, 36); // trig=37, echo=36
+// PiezoWeight wieghtSensor(pin)
 
-void setup() {
-  // Log 
+void setup()
+{
+  // Log
   Serial.begin(115200);
-  // UART 
+  // UART
   Serial2.begin(115200, SERIAL_8N1, 44, 43);
-  
-  if (!air.begin()) {
+
+  if (!air.begin())
+  {
     Serial.println("BME280 not found!");
-  } else {
+  }
+  else
+  {
     Serial.println("BME280 initialized");
   }
 
@@ -25,7 +31,8 @@ void setup() {
   // Serial2.println("Hello from ESP32");
 }
 
-void loop() {
+void loop()
+{
   float dist = sonar.readDistance();
   float temp = air.readTemperature();
   float pressure = air.readPressure();
@@ -46,30 +53,37 @@ void loop() {
   // Serial.println("-----------------------------------");
   //  end of log
   String message = "";
-  // message = "Dist: " + String(dist) + ";" + "Temp: " +String(temp);  
+  // message = "Dist: " + String(dist) + ";" + "Temp: " +String(temp);
   // Serial2.println(message);
 
-  while (Serial2.available() > 0){
+  while (Serial2.available() > 0)
+  {
     String command = Serial2.readStringUntil('\n');
     command.trim();
     Serial.print("Receive data from RASPI: ");
     Serial.println(command);
-    if(command == "activate"){
+    if (command == "activate")
+    {
       digitalWrite(pumpPin, HIGH);
       Serial2.println("PUMP ON");
-    } else if (command == "deactivate"){
+    }
+    else if (command == "deactivate")
+    {
       digitalWrite(pumpPin, LOW);
       Serial2.println("PUMP OFF");
-    } else if (command == "getdata"){
-        dist = sonar.readDistance();
-        temp = air.readTemperature();
-        pressure = air.readPressure();
-        humid = air.readHumidity();
-        message = String(dist) + ";" + String(temp);  
-        Serial2.println(message);
     }
-    else {
+    else if (command == "getdata")
+    {
+      dist = sonar.readDistance();
+      temp = air.readTemperature();
+      pressure = air.readPressure();
+      humid = air.readHumidity();
+      message = String(dist) + ";" + String(temp);
+      Serial2.println(message);
+    }
+    else
+    {
       Serial2.println("Unknown command bro: " + command);
     }
-  } 
+  }
 }
