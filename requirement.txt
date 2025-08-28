@@ -1,0 +1,3 @@
+serial
+pydrive2
+requests
