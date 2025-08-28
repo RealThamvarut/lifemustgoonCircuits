@@ -12,3 +12,4 @@ public:
 private:
     int pin;
 };
+#endif
