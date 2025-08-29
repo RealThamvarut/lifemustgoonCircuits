@@ -16,10 +16,11 @@ class ESP32:
         response = receive_data()
 
         if not response:
-            print("No response received.")
-            return
+            print("No response received")
 
         responseList = response.split(";")
+        if len(responseList) != 3:
+            print("Invalid response")
         self.waterLevel = responseList[0]
         self.temperature = responseList[1]
         self.weight = responseList[2]

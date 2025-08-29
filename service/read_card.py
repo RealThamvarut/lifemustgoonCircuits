@@ -20,9 +20,9 @@ class RC522CardReader:
             if self.previous_read is None:
                 self.previous_read = self.current_read
                 return self.current_read
-            else:
-                self.previous_read = self.current_read
-                return None
+        else:
+            self.previous_read = self.current_read
+            return None
     def translate_uid(self, uid) -> str:
         str_uid = ""
         for i in uid:

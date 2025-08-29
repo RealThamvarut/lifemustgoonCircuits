@@ -1,4 +1,5 @@
-i = 104
-a = str(hex(i))[2:]
+from databaseConnect import getUser, connectDB
 
-print(a)
+supabase = connectDB()
+result = getUser(supabase, "xd")
+print(len(result.data))

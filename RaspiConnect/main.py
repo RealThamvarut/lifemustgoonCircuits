@@ -15,12 +15,14 @@ if __name__ == "__main__":
         cardUID = card_reader.read_with_debounce()
         # print("Card UID:", card_reader.translate_uid(cardUID))
         if cardUID is not None :
-            if getUser(supabase, cardUID) != 0:
-                print(f"Found User: {cardUID}")
-                command = input("Enter command (or 'exit' to quit): ").strip()
-                if command.lower() == 'exit' or command.lower() == 'quit':
-                    break
+            hexUID = card_reader.translate_uid(cardUID)
+            if len(getUser(supabase, hexUID).data) != 0:
+                print(f"Found User: {hexUID}")
+                # command = input("Enter command (or 'exit' to quit): ").strip()
+                # if command.lower() == 'exit' or command.lower() == 'quit':
+                #     break
 
+                command = "activate"
                 send_command(command)
                 response = receive_data()
 
@@ -30,7 +32,7 @@ if __name__ == "__main__":
                     print("Temperature: ", esp32.temperature)
                     print("Weight", esp32.weight)
             else:
-                print(f"User {cardUID} not found")
+                print(f"User {hexUID} not found")
         else:
             print("Invalid user")
 
