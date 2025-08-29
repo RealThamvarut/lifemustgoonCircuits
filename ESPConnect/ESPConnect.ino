@@ -8,7 +8,7 @@
 
 AirSensor air;
 UltraSonic sonar(37, 36); // trig=37, echo=36
-// PiezoWeight wieghtSensor(pin)
+PiezoWeight wieghtSensor(15);
 
 void setup()
 {
@@ -37,6 +37,7 @@ void loop()
   float temp = air.readTemperature();
   float pressure = air.readPressure();
   float humid = air.readHumidity();
+  float weight = wieghtSensor.readWeight();
   // Log
   // Serial.print("Distance: ");
   // Serial.println(dist);
@@ -78,7 +79,8 @@ void loop()
       temp = air.readTemperature();
       pressure = air.readPressure();
       humid = air.readHumidity();
-      message = String(dist) + ";" + String(temp);
+      weight = wieghtSensor.readWeight();
+      message = String(dist) + ";" + String(temp) + ";" + String(weight);
       Serial2.println(message);
     }
     else
