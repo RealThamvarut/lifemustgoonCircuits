@@ -3,6 +3,30 @@ import serial
 
 ser = serial.Serial('/dev/ttyACM0', 115200, timeout=5)
 
+class ESP32:
+    def __init__(self):
+        self.waterLevel = None
+        self.temperature = None
+        self.weight = None
+        self.xd = "haha xD"
+        self.getSensor()
+
+    def getSensor(self):
+        send_command("getdata")
+        response = receive_data()
+
+        if not response:
+            print("No response received.")
+            return
+
+        responseList = response.split(";")
+        self.waterLevel = responseList[0]
+        self.temperature = responseList[1]
+        self.weight = responseList[2]
+
+    def sayHi(self):
+        return self.xd
+
 def send_command(cmd):
     if not cmd:
         return None
