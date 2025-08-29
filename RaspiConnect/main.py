@@ -1,5 +1,6 @@
 from serial_handler import ESP32,send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
+from read_card import getUID
 
 
 if __name__ == "__main__":
@@ -9,7 +10,8 @@ if __name__ == "__main__":
     esp32 = ESP32()
     
     while True:
-        # UIDCard = getUID() # TODO
+
+        getUID()
 
         command = input("Enter command (or 'exit' to quit): ").strip()
         if command.lower() == 'exit' or command.lower() == 'quit':

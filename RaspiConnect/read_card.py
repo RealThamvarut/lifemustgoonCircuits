@@ -2,6 +2,17 @@ from pirc522 import RFID
 rdr = RFID(pin_rst= 22)
 isRead = False
 
+def getUID():
+  while True:
+    (error, tag_type) = rdr.request()
+    if not error:
+      print("Tag detected")
+      (error, uid) = rdr.anticoll()
+      if not error & (not isRead):
+        isRead = True
+        print("UID: " + str(uid))
+        return uid
+
 try:
   while True:
     #rdr.wait_for_tag()
