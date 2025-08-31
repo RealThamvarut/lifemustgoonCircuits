@@ -1,16 +1,16 @@
-#include "AirSensor.h"
 #include "UltraSonic.h"
 #include "PiezoWeight.h"
+#include "Temperature.h"
 #include <math.h>
+#include <Arduino.h>
 
 // #define RX1 44
 // #define TX1 43
 #define pumpPin 5
 
-AirSensor air;
 UltraSonic sonar(37, 36); // trig=37, echo=36
 PiezoWeight wieghtSensor(15);
-
+Temperature temp(16, DHT22);
 
 void setup()
 {
@@ -19,17 +19,9 @@ void setup()
   // UART
   Serial2.begin(115200, SERIAL_8N1, 44, 43);
 
-  if (!air.begin())
-  {
-    Serial.println("BME280 not found!");
-  }
-  else
-  {
-    Serial.println("BME280 initialized");
-  }
-
   pinMode(pumpPin, OUTPUT); // set water-pump trigger
   pinMode(15, INPUT);
+  temp.begin();
   Serial.println("Serial begin...");
   // Serial2.println("Hello from ESP32");
 }
@@ -42,11 +34,9 @@ float getWaterLevel(float distance, float radius = 4.5, float tankHeight = 16.5)
 void loop()
 {
   float dist = sonar.readDistance();
-  float temp = air.readTemperature();
-  float pressure = air.readPressure();
-  float humid = air.readHumidity();
   // float weight = wieghtSensor.readWeight();
   float weight = analogRead(15);
+  float celcius = temp.getTemperature();
   // Log
   // Serial.print("Distance: ");
   // Serial.println(dist);s
@@ -106,15 +96,13 @@ void loop()
     {
       dist = sonar.readDistance();
       // float currentWaterLevel = getWaterLevel(dist);
-      temp = air.readTemperature();
-      pressure = air.readPressure();
-      humid = air.readHumidity();
       weight = analogRead(15);
+      celcius = temp.getTemperature();
 
-      message = String(dist) + ";" + String(temp) + ";" + String(weight);
+      message = String(dist) + ";" + String(celcius) + ";" + String(weight);
       Serial2.println(message);
     }
-    else if (command == "")
+    else if (command == "");
     else
     {
       Serial2.println("Unknown command bro: " + command);
