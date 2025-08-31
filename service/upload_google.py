@@ -21,7 +21,7 @@ class ESPCAMDriveUploader:
         gauth.LoadCredentialsFile(self.credentials)
         
         if gauth.credentials is None:
-            gauth.LocalWebserverAuth()
+            gauth.CommandLineAuth()
         elif gauth.access_token_expired:
             gauth.Refresh()
         else:
@@ -84,3 +84,5 @@ class ESPCAMDriveUploader:
         from datetime import datetime
         now = datetime.now()
         return now.strftime("esp32_image_%Y%m%d_%H%M%S.jpg")
+    
+   
