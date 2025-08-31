@@ -10,10 +10,10 @@ class ESPCAMDriveUploader:
         self.credentials = credentials
         self.drive = self.authenticate_google_drive()
         self.folder_id = folder_id
-        if self.try_camera(ESPCAM_ip) is not None:
-            self.ESPCAM_ip = self.try_camera(ESPCAM_ip)
-        else:
-            self.ESPCAM_ip = self.try_camera_iterate_on_error(ESPCAM_ip)
+        # if self.try_camera(ESPCAM_ip) is not None:
+        #     self.ESPCAM_ip = self.try_camera(ESPCAM_ip)
+        # else:
+        #     self.ESPCAM_ip = self.try_camera_iterate_on_error(ESPCAM_ip)
 
     #google drive authenticate
     def authenticate_google_drive(self):

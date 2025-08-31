@@ -1,4 +1,4 @@
-from service.upload_google import ESPCAMDriveUploader
+from service.camera import ESPCAMDriveUploader
 
 #need client_secret.json
 def main():
@@ -13,10 +13,11 @@ def main():
         print("Capturing image")
         img_bytes = uploader.capture_image_bytes() # this will capture the image from the ESP32 camera
         print(f"Captured: {len(img_bytes)} bytes")
-
-        filename = uploader.generate_filename() #generate file name for the image
-        print(f"Uploading image as {filename}")
-        uploader.upload_image_bytes(img_bytes, filename) #upload the image
+        #mock image for testing
+        # with open("temp.jpg", "rb") as f:
+        #     img_bytes = f.read()
+            
+        uploader.upload_image_bytes(img_bytes) #upload the image
         print(f"Upload complete")
     except Exception as e:
         print(f"Error occurred: {e}")
