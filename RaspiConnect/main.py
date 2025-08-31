@@ -1,6 +1,7 @@
 from serial_handler import ESP32,send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
 from read_card import RC522CardReader
+from led import Led
 
 
 if __name__ == "__main__":
@@ -9,6 +10,7 @@ if __name__ == "__main__":
     supabase = connectDB()
     esp32 = ESP32()
     card_reader = RC522CardReader()
+    led = Led()
 
     while True:
 
@@ -18,6 +20,8 @@ if __name__ == "__main__":
             hexUID = card_reader.translate_uid(cardUID)
             if len(getUser(supabase, hexUID).data) != 0:
                 print(f"Found User: {hexUID}")
+                led.greenOn()
+
                 # command = input("Enter command (or 'exit' to quit): ").strip()
                 # if command.lower() == 'exit' or command.lower() == 'quit':
                 #     break
@@ -31,11 +35,12 @@ if __name__ == "__main__":
                 print("WaterLevel: ", esp32.waterLevel)
                 print("Temperature: ", esp32.temperature)
                 print("Weight", esp32.weight)
+                led.greenOff()
             else:
                 print(f"User {hexUID} not found")
-        else:
-            print("Invalid user")
-
+                led.redOn()
+        # else:
+        #     print("Invalid user")
     
     close_serial()
     print("Connection closed!")

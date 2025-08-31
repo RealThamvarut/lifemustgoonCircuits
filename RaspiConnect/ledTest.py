@@ -1,36 +1,37 @@
-import gpiod
+import lgpio
 import time
 
-RED_LED_PIN = 33
-GREEN_LED_PIN = 29
-YELLOW_LED_PIN = 31
+# BCM GPIO numbers (not physical pins!)
+RED = 17     # physical pin 33
+YELLOW = 27   # physical pin 31
+GREEN = 22    # physical pin 29
 
-chip = gpiod.Chip('gpiochip4')
+# Open gpiochip0 (main GPIO controller)
+gpioController = lgpio.gpiochip_open(0)
 
-red_led_line = chip.get_line(RED_LED_PIN)
-green_led_line = chip.get_line(GREEN_LED_PIN)
-yellow_led_line = chip.get_line(YELLOW_LED_PIN)
-
-red_led_line.request(consumer="LED", type=gpiod.LINE_REQ_DIR_OUT)
-green_led_line.request(consumer="LED", type=gpiod.LINE_REQ_DIR_OUT)
-yellow_led_line.request(consumer="LED", type=gpiod.LINE_REQ_DIR_OUT)
+# Claim the lines as outputs
+lgpio.gpio_claim_output(gpioController, RED)
+lgpio.gpio_claim_output(gpioController, YELLOW)
+lgpio.gpio_claim_output(gpioController, GREEN)
 
 try:
     while True:
-        # Example traffic light sequence
-        red_led_line.set_value(1)
+        # Red ON
+        lgpio.gpio_write(gpioController, RED, 1)
         time.sleep(1)
-        red_led_line.set_value(0)
+        lgpio.gpio_write(gpioController, RED, 0)
 
-        yellow_led_line.set_value(1)
+        # Yellow ON
+        lgpio.gpio_write(gpioController, YELLOW, 1)
         time.sleep(1)
-        yellow_led_line.set_value(0)
+        lgpio.gpio_write(gpioController, YELLOW, 0)
 
-        green_led_line.set_value(1)
+        # Green ON
+        lgpio.gpio_write(gpioController, GREEN, 1)
         time.sleep(1)
-        green_led_line.set_value(0)
+        lgpio.gpio_write(gpioController, GREEN, 0)
 
+except KeyboardInterrupt:
+    pass
 finally:
-    red_led_line.release()
-    yellow_led_line.release()
-    green_led_line.release()
+    lgpio.gpiochip_close(gpioController)

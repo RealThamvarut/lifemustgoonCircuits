@@ -8,7 +8,6 @@ class ESP32:
         self.waterLevel = None
         self.temperature = None
         self.weight = None
-        self.xd = "haha xD"
         self.getSensor()
 
     def getSensor(self):
@@ -50,9 +49,6 @@ def receive_data():
     except serial.SerialException as e:
         return f"Nah uh something failed: {e}"
     
-def print_text(text):
-    return ("Hi, " + text)
-
 def close_serial():
     ser.close()
     return None
