@@ -26,11 +26,11 @@ if __name__ == "__main__":
                 send_command(command)
                 response = receive_data()
 
-                if command == "getdata":
-                    esp32.getSensor()
-                    print("WaterLevel: ", esp32.waterLevel)
-                    print("Temperature: ", esp32.temperature)
-                    print("Weight", esp32.weight)
+                # if command == "getdata":
+                esp32.getSensor()
+                print("WaterLevel: ", esp32.waterLevel)
+                print("Temperature: ", esp32.temperature)
+                print("Weight", esp32.weight)
             else:
                 print(f"User {hexUID} not found")
         else:

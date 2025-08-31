@@ -114,6 +114,7 @@ void loop()
       message = String(dist) + ";" + String(temp) + ";" + String(weight);
       Serial2.println(message);
     }
+    else if (command == "")
     else
     {
       Serial2.println("Unknown command bro: " + command);

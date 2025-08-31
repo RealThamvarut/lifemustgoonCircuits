@@ -21,7 +21,7 @@ class ESP32:
         responseList = response.split(";")
         if len(responseList) != 3:
             print("Invalid response")
-        self.waterLevel = responseList[0]
+        self.waterLevel = round(max(((16 - float(responseList[0])) / 0.16 ), 0), 2)
         self.temperature = responseList[1]
         self.weight = responseList[2]
 
