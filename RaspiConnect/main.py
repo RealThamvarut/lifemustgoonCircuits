@@ -16,39 +16,42 @@ if __name__ == "__main__":
         ESPCAM_ip=ESPCAM_IP,
         folder_id="1dcXa6NMK8xF6Cq1ojAuWLIGZRhY_Ca2-" 
     )  
+    try:
+        while True:
 
-    while True:
+            cardUID = card_reader.read_with_debounce()
+            # print("Card UID:", card_reader.translate_uid(cardUID))
+            if cardUID is not None :
+                hexUID = card_reader.translate_uid(cardUID)
+                if len(getUser(supabase, hexUID).data) != 0:
+                    print(f"Found User: {hexUID}")
+                    led.greenOn()
 
-        cardUID = card_reader.read_with_debounce()
-        # print("Card UID:", card_reader.translate_uid(cardUID))
-        if cardUID is not None :
-            hexUID = card_reader.translate_uid(cardUID)
-            if len(getUser(supabase, hexUID).data) != 0:
-                print(f"Found User: {hexUID}")
-                led.greenOn()
+                    # command = input("Enter command (or 'exit' to quit): ").strip()
+                    # if command.lower() == 'exit' or command.lower() == 'quit':
+                    #     break
 
-                # command = input("Enter command (or 'exit' to quit): ").strip()
-                # if command.lower() == 'exit' or command.lower() == 'quit':
-                #     break
+                    command = "activate"
+                    send_command(command)
+                    response = receive_data()
 
-                command = "activate"
-                send_command(command)
-                response = receive_data()
+                    img = camera.capture_image_bytes()
+                    camera.upload_image_bytes(img)
 
-                img = camera.capture_image_bytes()
-                camera.upload_image_bytes(img)
-
-                # if command == "getdata":
-                esp32.getSensor()
-                print("WaterLevel: ", esp32.waterLevel)
-                print("Temperature: ", esp32.temperature)
-                print("Weight", esp32.weight)
-                led.greenOff()
-            else:
-                print(f"User {hexUID} not found")
-                led.redOn()
-        # else:
-        #     print("Invalid user")
-    
-    close_serial()
-    print("Connection closed!")
+                    # if command == "getdata":
+                    esp32.getSensor()
+                    print("WaterLevel: ", esp32.waterLevel)
+                    print("Temperature: ", esp32.temperature)
+                    print("Weight", esp32.weight)
+                    led.greenOff()
+                else:
+                    print(f"User {hexUID} not found")
+                    led.redOn()
+            # else:
+            #     print("Invalid user")
+    finally:
+        close_serial()
+        led.setLed("red", 0)
+        led.setLed("yellow", 0)
+        led.setLed("green", 0)
+        print("Connection closed!")
