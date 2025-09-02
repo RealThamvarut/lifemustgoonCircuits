@@ -55,9 +55,9 @@ void loop()
   dist = round(dist);
   // lcd.clear();
   lcd.setCursor(0,0); 
-  lcd.print("Water Lv:" + String(dist) + "% ");
+  lcd.print("Water Lv:" + String(dist) + "%   ");
   lcd.setCursor(0,1); 
-  lcd.print("Temp:" + String(celcius) + " C ");
+  lcd.print("Temp:" + String(celcius) + " C   ");
 
   // Log
   // Serial.print("Distance: ");
@@ -86,6 +86,9 @@ void loop()
     {
       unsigned long startTime = millis();
       bool isVibration = false;
+      lcd.clear();
+      lcd.setCursor(0,0); 
+      lcd.print("Place your cup!");
       while ((millis() - startTime) < 5000) {
         weight = analogRead(15);
         if (weight >= 2000){
@@ -93,8 +96,10 @@ void loop()
           break;
         }
       }
-
+      lcd.clear();
       if (isVibration){
+        lcd.setCursor(0,0); 
+        lcd.print("Pumping");
         digitalWrite(pumpPin, HIGH);
 
         unsigned long startTime = millis();
@@ -102,6 +107,7 @@ void loop()
 
         Serial2.println("PUMP active: " + String(weight));
         digitalWrite(pumpPin, LOW);
+        lcd.clear();
       }
       else{
         Serial2.println("PUMP not active: " + String(weight));
@@ -116,7 +122,6 @@ void loop()
     }
     else if (command == "getdata")
     {
-      lcd.clear();
       dist = sonar.readDistance();
       // float currentWaterLevel = getWaterLevel(dist);
       weight = analogRead(15);
