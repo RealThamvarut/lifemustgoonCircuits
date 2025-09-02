@@ -3,14 +3,21 @@
 #include "Temperature.h"
 #include <math.h>
 #include <Arduino.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 // #define RX1 44
 // #define TX1 43
 #define pumpPin 5
 
+// Define I2C pins
+#define SDA_PIN  8 
+#define SCL_PIN  9 
+
 UltraSonic sonar(37, 36); // trig=37, echo=36
 PiezoWeight wieghtSensor(15);
 Temperature temp(16, DHT22);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup()
 {
@@ -18,6 +25,12 @@ void setup()
   Serial.begin(9600);
   // UART
   Serial2.begin(115200, SERIAL_8N1, 44, 43);
+  
+  Wire.begin(SDA_PIN, SCL_PIN); 
+  lcd.init();                     
+  lcd.backlight();
+  lcd.clear();
+  
 
   pinMode(pumpPin, OUTPUT); // set water-pump trigger
   pinMode(15, INPUT);
@@ -37,6 +50,15 @@ void loop()
   // float weight = wieghtSensor.readWeight();
   float weight = analogRead(15);
   float celcius = temp.getTemperature();
+  dist = (16 - dist) / 0.16;
+  if(dist < 0) dist = 0;
+  dist = round(dist);
+  // lcd.clear();
+  lcd.setCursor(0,0); 
+  lcd.print("Water Lv:" + String(dist) + "% ");
+  lcd.setCursor(0,1); 
+  lcd.print("Temp:" + String(celcius) + " C ");
+
   // Log
   // Serial.print("Distance: ");
   // Serial.println(dist);s
@@ -94,6 +116,7 @@ void loop()
     }
     else if (command == "getdata")
     {
+      lcd.clear();
       dist = sonar.readDistance();
       // float currentWaterLevel = getWaterLevel(dist);
       weight = analogRead(15);
