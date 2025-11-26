@@ -6,13 +6,13 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-// #define RX1 44
-// #define TX1 43
-#define pumpPin 5
+#define RX1 44
+#define TX1 43
+// #define pumpPin 5
 
 // Define I2C pins
-#define SDA_PIN  8 
-#define SCL_PIN  9 
+#define SDA_PIN  8
+#define SCL_PIN  9
 
 UltraSonic sonar(37, 36); // trig=37, echo=36
 PiezoWeight wieghtSensor(15);
@@ -23,16 +23,20 @@ void setup()
 {
   // Log
   Serial.begin(9600);
+
   // UART
   Serial2.begin(115200, SERIAL_8N1, 44, 43);
   
   Wire.begin(SDA_PIN, SCL_PIN); 
+  
   lcd.init();                     
   lcd.backlight();
   lcd.clear();
+
+  lcd.print("xD");
   
 
-  pinMode(pumpPin, OUTPUT); // set water-pump trigger
+  // pinMode(pumpPin, OUTPUT); // set water-pump trigger
   pinMode(15, INPUT);
   temp.begin();
   Serial.println("Serial begin...");
@@ -53,25 +57,23 @@ void loop()
   dist = (16 - dist) / 0.16;
   if(dist < 0) dist = 0;
   dist = round(dist);
+
   // lcd.clear();
-  lcd.setCursor(0,0); 
-  lcd.print("Water Lv:" + String(dist) + "%   ");
-  lcd.setCursor(0,1); 
-  lcd.print("Temp:" + String(celcius) + " C   ");
+  // lcd.setCursor(0,0); 
+  // lcd.print("Water Lv:" + String(dist) + "%   ");
+  // lcd.setCursor(0,1); 
+  // lcd.print("Temp:" + String(celcius) + " C   ");
 
   // Log
   // Serial.print("Distance: ");
-  // Serial.println(dist);s
-
+  // Serial.println(dist);
+  //
   // Serial.print("Temp: ");
-  // Serial.println(temp);
-
+  // Serial.println(celcius);
+  //
   // Serial.print("Pressure: ");
-  // Serial.println(pressure);
-
-  // Serial.print("Humid: ");
-  // Serial.println(humid);
-
+  // Serial.println(weight);
+  //
   // Serial.println("-----------------------------------");
   //  end of log
   String message = "";
@@ -86,9 +88,9 @@ void loop()
     {
       unsigned long startTime = millis();
       bool isVibration = false;
-      lcd.clear();
-      lcd.setCursor(0,0); 
-      lcd.print("Place your cup!");
+      // lcd.clear();
+      // lcd.setCursor(0,0); 
+      // lcd.print("Place your cup!");
       while ((millis() - startTime) < 5000) {
         weight = analogRead(15);
         if (weight >= 2000){
@@ -96,18 +98,18 @@ void loop()
           break;
         }
       }
-      lcd.clear();
+      // lcd.clear();
       if (isVibration){
-        lcd.setCursor(0,0); 
-        lcd.print("Pumping");
-        digitalWrite(pumpPin, HIGH);
+        // lcd.setCursor(0,0); 
+        // lcd.print("Pumping");
+        // digitalWrite(pumpPin, HIGH);
 
         unsigned long startTime = millis();
         while ((millis() - startTime) < 5000) {}
 
         Serial2.println("PUMP active: " + String(weight));
-        digitalWrite(pumpPin, LOW);
-        lcd.clear();
+        // digitalWrite(pumpPin, LOW);
+        // lcd.clear();
       }
       else{
         Serial2.println("PUMP not active: " + String(weight));
@@ -117,7 +119,7 @@ void loop()
     }
     else if (command == "deactivate")
     {
-      digitalWrite(pumpPin, LOW);
+      // digitalWrite(pumpPin, LOW);
       Serial2.println("PUMP OFF");
     }
     else if (command == "getdata")
