@@ -29,9 +29,12 @@ def model_fn(model_dir):
             os.makedirs(target_weight_path, exist_ok=True)
     else:
         print(f"Weights already exist at {target_weight_path}, skipping copy.")
-    os.environ["DEEPFACE_HOME"] = target_weight_path
+    os.environ["DEEPFACE_HOME"] = target_home
 
-    return model_dir #return anything actually
+    DeepFace.build_model(model_name="Age")
+    DeepFace.build_model(model_name="Gender")
+
+    return "model loaded" #return anything actually
 
 def input_fn(request_body, request_content_type):
     if request_content_type:
@@ -55,7 +58,7 @@ def predict_fn(input_object, model):
         return {
             "age": result.get("age"),
             "gender": result.get("gender"),
-            "gender_confidence": result['gender'][result["dominant_gender"]]
+            "gender_confidence": result.get("gender", {}).get(result.get("dominant_gender"), 0) if isinstance(result.get("gender"), dict) else "N/A"
         }
     except Exception as e:
         print(f"Error during prediction: {e}")
