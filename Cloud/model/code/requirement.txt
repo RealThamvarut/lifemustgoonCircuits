@@ -1,3 +1,4 @@
 deepface
 numpy
-opencv-python
+opencv-python-headless
+tf-keras
