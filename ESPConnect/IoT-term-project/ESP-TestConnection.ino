@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <string.h>
 
 void setup()
 {
@@ -31,6 +32,11 @@ void loop()
         Serial1.print("Received data from RP5: ");
         Serial1.println(input);
 
-        // Extract link from
+        if(input == "Youtube"){
+            
+        }
+        if(input == "activate"){
+            
+        }
     }
 }
