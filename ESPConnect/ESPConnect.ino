@@ -7,6 +7,9 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
+#define SSID "thamva_router"
+#define PASSWORD ""
+
 #define RX1 44
 #define TX1 43
 
@@ -32,6 +35,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup()
 {
   Serial.begin(9600);
+
+  connectWiFi(SSID, PASSWORD);
 
   // UART
   Serial2.begin(115200, SERIAL_8N1, RX1, TX1);
