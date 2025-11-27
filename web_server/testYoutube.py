@@ -8,7 +8,8 @@ def indexTest():
 
 @app.route("/ad", methods=["GET", "POST"])
 def ad():
-    youtube_url = "https://www.youtube.com/watch?v=v0NDDoNRtQ8"
+    # Template URL for testing
+    youtube_url = "https://www.youtube.com/watch?v=v0NDDoNRtQ8" 
     video_id = None
     if request.method == "POST":
         if "watch?v=" in youtube_url:
