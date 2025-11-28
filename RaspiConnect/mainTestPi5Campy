@@ -1,11 +1,15 @@
 from serial_handler import ESP32,send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
+from thingSpeakConnect import init_mqtt, send_to_thingspeak
 from read_card import RC522CardReader
 from led import Led
 from camera import PI5CAMDriveUploader
 
 if __name__ == "__main__":
 
+    # connectThingSpeak
+    client = init_mqtt()
+    
     # connectDB()
     supabase = connectDB()
     esp32 = ESP32()
@@ -40,6 +44,9 @@ if __name__ == "__main__":
                     print("Temperature: ", esp32.temperature)
                     print("Weight", esp32.weight)
                     led.greenOff()
+                    
+                    # send to MQTT
+                    send_to_thingspeak(cardUID, client)
                 else:
                     print(f"User {hexUID} not found")
                     led.redOn()
