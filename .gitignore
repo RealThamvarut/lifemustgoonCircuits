@@ -2,3 +2,5 @@ client_secrets.json
 credentials.json
 __pycache__
 ./.../__pycache__
+Cloud/code/models/*
+test/*

@@ -1,59 +1,56 @@
-import base64
 import json
-import logging
-import os
-
-import cv2
-from insightface.app import FaceAnalysis
-import numpy as np
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-#global variable to hold model in memory (maybe not needed)
-app = None
+import torch
+import base64
+import io
+from PIL import Image
+from transformers import pipeline
 
 def model_fn(model_dir):
-    global app
-    logger.info("Loading model from %s", model_dir)
-
-    model_root = os.path.join(model_dir, "code", "models")
-    app = FaceAnalysis(name="antelope", root=model_root)
-    #ctx_id=0 for GPU, standard detection size - can try (320, 320) for faster inference
-    app.prepare(ctx_id=0, det_size=(640, 640))
-
-    logger.info("Model loaded successfully")
-    return app
+    """
+    Load the model from the Hugging Face Hub.
+    SageMaker calls this function when the container starts.
+    """
+    device = 0 if torch.cuda.is_available() else -1
+    print(f"Loading model to device: {device}")
+    
+    # We load the pipeline directly from the Hub.
+    # 'trust_remote_code=True' is required because this model uses a custom architecture.
+    pipe = pipeline(
+        "age-gender-classification", 
+        model="abhilash88/age-gender-prediction", 
+        trust_remote_code=True,
+        device=device
+    )
+    return pipe
 
 def input_fn(request_body, request_content_type):
+    """
+    Deserialize the request body into an image object.
+    Supports JSON (with base64 image) or raw image bytes.
+    """
     if request_content_type == 'application/json':
+        # Expects {"inputs": "base64_string"}
         input_data = json.loads(request_body)
-        if 'image_base64' not in input_data:
-            img_data = base64.b64decode(input_data['image_base64'])
-            np_arr = np.frombuffer(img_data, np.uint8)
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            return img
-        
-        raise ValueError("Unsupported content type: {}".format(request_content_type))
+        if 'inputs' in input_data:
+            image_data = base64.b64decode(input_data['inputs'])
+            return Image.open(io.BytesIO(image_data)).convert("RGB")
+    
+    if request_content_type in ('image/jpeg', 'image/png'):
+        return Image.open(io.BytesIO(request_body)).convert("RGB")
 
-def predict_fn(input_data, model):
-    faces = model.get(input_data)
+    raise ValueError(f"Unsupported content type: {request_content_type}")
 
-    result = []
-    for face in faces:
-        res = {
-            "bbox": face.bbox.astype(int).tolist(),
-            "age": int(face.age),
-            "gender": "Male" if face.gender == 1 else "Female",
-            "gender_confidence": float(face.gender) if face.gender > 0 else 0.0,
-            "score": float(face.det_score),
-        }
-        result.append(res)
+def predict_fn(input_object, model):
+    """
+    Run the prediction on the decoded input.
+    """
+    # The pipeline handles the inference details
+    prediction = model(input_object)
+    return prediction
 
-    return result
-
-#serialize back to json
-def output_fn(prediction, res_content_type):
-    if res_content_type == 'application/json':
-        return json.dumps(prediction)
-    raise ValueError(f"Unsupported content type: {res_content_type}")
+def output_fn(prediction, response_content_type):
+    """
+    Serialize the prediction result to JSON.
+    """
+    # Example output from model: {'age': 28, 'gender': 'Male', 'gender_confidence': 0.98}
+    return json.dumps(prediction)
