@@ -2,7 +2,7 @@
 #define TEMPERATURE_H
 
 #include <Arduino.h>
-#include <DHT.h>
+#include <DHT.h> //AM2302-Sensor lib
 
 class Temperature {
   private:

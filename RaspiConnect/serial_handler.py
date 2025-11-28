@@ -24,9 +24,6 @@ class ESP32:
         self.temperature = responseList[1]
         self.weight = responseList[2]
 
-    def sayHi(self):
-        return self.xd
-
 def send_command(cmd):
     if not cmd:
         return None

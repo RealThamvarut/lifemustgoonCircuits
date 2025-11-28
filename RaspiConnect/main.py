@@ -20,20 +20,20 @@ if __name__ == "__main__":
                     print(f"Found User: {hexUID}")
                     led.greenOn()
 
-                    # command = input("Enter command (or 'exit' to quit): ").strip()
-                    # if command.lower() == 'exit' or command.lower() == 'quit':
-                    #     break
+                    command = input("Enter command (or 'exit' to quit): ").strip()
+                    if command.lower() == 'exit' or command.lower() == 'quit':
+                        break
 
                     # command = "activate"
                     # send_command(command)
                     # response = receive_data()
 
 
-                    # if command == "getdata":
-                    esp32.getSensor()
-                    print("WaterLevel: ", esp32.waterLevel)
-                    print("Temperature: ", esp32.temperature)
-                    print("Weight", esp32.weight)
+                    if command == "getdata":
+                        esp32.getSensor()
+                        print("WaterLevel: ", esp32.waterLevel)
+                        print("Temperature: ", esp32.temperature)
+                        print("Weight", esp32.weight)
                     led.greenOff()
                 else:
                     print(f"User {hexUID} not found")
