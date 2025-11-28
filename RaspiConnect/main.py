@@ -2,20 +2,13 @@ from serial_handler import ESP32,send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
 from read_card import RC522CardReader
 from led import Led
-from camera import ESPCAMDriveUploader
 
 if __name__ == "__main__":
 
-    # connectDB()
     supabase = connectDB()
     esp32 = ESP32()
     card_reader = RC522CardReader()
     led = Led()
-    ESPCAM_IP = "192.168.1.105"
-    camera = ESPCAMDriveUploader(
-        ESPCAM_ip=ESPCAM_IP,
-        folder_id="1dcXa6NMK8xF6Cq1ojAuWLIGZRhY_Ca2-" 
-    )  
     try:
         while True:
 
@@ -31,12 +24,10 @@ if __name__ == "__main__":
                     # if command.lower() == 'exit' or command.lower() == 'quit':
                     #     break
 
-                    command = "activate"
-                    send_command(command)
-                    response = receive_data()
+                    # command = "activate"
+                    # send_command(command)
+                    # response = receive_data()
 
-                    img = camera.capture_image_bytes()
-                    camera.upload_image_bytes(img)
 
                     # if command == "getdata":
                     esp32.getSensor()
