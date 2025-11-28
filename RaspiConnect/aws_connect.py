@@ -9,7 +9,7 @@ import _thread
 def on_connect(client, userdata, flags, rc):
     print("Connect to AWS IoT:" , str(rc))
 
-path = "home/admin/Documents/aws_cert/"
+path = "/./home/admin/Documents/aws_cert/"
 
 client = mqtt.Client()
 client.on_connect = on_connect
