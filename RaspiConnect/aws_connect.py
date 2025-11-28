@@ -16,7 +16,7 @@ path = "/home/admin/Documents/aws_cert/"
 client = mqtt.Client()
 client.on_connect = on_connect
 client.tls_set(ca_certs=path + "rootCA1.pem", certfile=path + "certificate.pem.crt", keyfile=path + "private.pem.key", tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
-client.tls.insecure_set(True)
+# client.tls.insecure_set(True)
 client.connect("a3qvtgigehocs2-ats.iot.ap-southeast-1.amazonaws.com", 8883, 60)
 
 def publish_sensor_data():
