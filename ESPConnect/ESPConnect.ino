@@ -2,13 +2,24 @@
 #include "PiezoWeight.h"
 #include "Temperature.h"
 #include "Utils.h"
+#include "MQTT.h"
 #include <math.h>
 #include <Arduino.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <WiFi.h>
 
-#define SSID "thamva_router"
-#define PASSWORD ""
+#define SSID "Thamva-router"
+#define PASSWORD "<thamva12345>"
+
+// MQTT Broker details
+#define MQTT_SERVER "mqtt3.thingspeak.com"
+#define MQTT_PORT 1883
+#define MQTT_USER "LwEPGy4rLh4tMhMDLQwgBwc"
+#define MQTT_PASSWORD "/dhZK/IMhUvop5mPCqhQqm4h"
+#define MQTT_CLIENT_ID "LwEPGy4rLh4tMhMDLQwgBwc"
+#define MQTT_TOPIC_WATER_LEVEL "channels/3184682/publish"
+#define MQTT_TOPIC_TEMPERATURE "channels/3185470/publish"
 
 #define RX1 44
 #define TX1 43
@@ -31,12 +42,14 @@ UltraSonic sonar(37, 36); // trig=37, echo=36
 PiezoWeight wieghtSensor(W_PIN);
 Temperature temp(T_PIN, DHT22);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+MQTT mqtt(MQTT_SERVER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD, MQTT_CLIENT_ID);
 
 void setup()
 {
   Serial.begin(9600);
 
   connectWiFi(SSID, PASSWORD);
+  mqtt.setup();
 
   // UART
   Serial2.begin(115200, SERIAL_8N1, RX1, TX1);
@@ -50,12 +63,11 @@ void setup()
   // pinMode(pumpPin, OUTPUT); // set water-pump trigger
   pinMode(W_PIN, INPUT);
   temp.begin();
-  Serial.println("Serial begin...");
-  // Serial2.println("Hello from ESP32");
 }
 
 void loop()
 {
+  mqtt.loop();
   float dist = sonar.readDistance();
   float weight = analogRead(W_PIN);
   float celcius = temp.getTemperature();
@@ -64,33 +76,42 @@ void loop()
   if(dist < 0) dist = 0;
   dist = round(dist);
 
+  // Log
+  
   // lcd.clear();
   // lcd.setCursor(0,0); 
   // lcd.print("Water Lv:" + String(dist) + "%   ");
   // lcd.setCursor(0,1); 
   // lcd.print("Temp:" + String(celcius) + " C   ");
 
-  // Log
-  // Serial.print("Distance: ");
-  // Serial.println(dist);
+  // Serial2.print("Distance: ");
+  // Serial2.println(dist);
   //
-  // Serial.print("Temp: ");
-  // Serial.println(celcius);
+  // Serial2.print("Temp: ");
+  // Serial2.println(celcius);
   //
-  // Serial.print("Pressure: ");
-  // Serial.println(weight);
+  // Serial2.print("Pressure: ");
+  // Serial2.println(weight);
   //
-  // Serial.println("-----------------------------------");
+  // Serial2.println("-----------------------------------");
   
+  // lcd.clear();
+  // lcd.setCursor(0,0); 
+  // lcd.print("Water Lv:" + String(dist) + "%   ");
+  // lcd.setCursor(0,1); 
+  // lcd.print("Temp:" + String(celcius) + " C   ");
+  //
   //  end of log
+  
+  mqtt.publish(MQTT_TOPIC_WATER_LEVEL, ("field1=" + String(dist)).c_str());
+  mqtt.publish(MQTT_TOPIC_TEMPERATURE, ("field1=" + String(celcius)).c_str());
+
   String message = "";
 
   while (Serial2.available() > 0)
   {
     String command = Serial2.readStringUntil('\n');
     command.trim();
-    Serial.print("Receive data from RASPI: ");
-    Serial.println(command);
     if (command == "activate")
     {
       // lcd.clear();
@@ -108,7 +129,7 @@ void loop()
         unsigned long startTime = millis();
         while ((millis() - startTime) < 5000) {}
 
-        Serial2.println("PUMP active: " + String(weight));
+        // Serial.println("PUMP active: " + String(weight));
         // digitalWrite(pumpPin, LOW);
         // lcd.clear();
       }
