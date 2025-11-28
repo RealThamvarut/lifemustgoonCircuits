@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def indexTest():
-    return render_template('indexTest.html')
+    return render_template('index.html')
 
 @app.route("/ad", methods=["GET", "POST"])
 def ad():
