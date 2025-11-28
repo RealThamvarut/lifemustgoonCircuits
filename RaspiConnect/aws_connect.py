@@ -30,4 +30,4 @@ def publish_sensor_data():
 
 _thread.start_new_thread(publish_sensor_data, ())
 
-client.loop_start()
+client.loop_forever()
