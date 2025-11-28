@@ -1,6 +1,6 @@
 import cv2
 import time
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 import random
 from picamera2 import Picamera2
 
@@ -35,12 +35,17 @@ def index():
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/ads', methods=['POST'])
-def ads():
-    # TODO #Implement logic for displaying ad here.
-    
-    
-    return render_template('ad.html')
+@app.route("/ad", methods=["GET", "POST"])
+def ad():
+    # Template URL for testing
+    youtube_url = "https://www.youtube.com/watch?v=v0NDDoNRtQ8" 
+    video_id = None
+    if request.method == "POST":
+        if "watch?v=" in youtube_url:
+            video_id = youtube_url.split("watch?v=")[1]
+        elif "youtu.be/" in youtube_url:
+            video_id = youtube_url.split("youtu.be/")[1]
+    return render_template("ad.html", video_id=video_id)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
