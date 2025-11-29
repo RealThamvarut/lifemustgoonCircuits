@@ -15,11 +15,11 @@ while ( !client.connected() )
   {
     // Connect to the MQTT broker.
     if ( client.connect( _client_id, _user, _password ) ) {
-      Serial2.print( "MQTT to " );
-      Serial2.print( _server );
-      Serial2.print (" at port ");
-      Serial2.print( _port );
-      Serial2.println( " successful." );
+      // Serial2.print( "MQTT to " );
+      // Serial2.print( _server );
+      // Serial2.print (" at port ");
+      // Serial2.print( _port );
+      // Serial2.println( " successful." );
     } else {
       Serial2.print( "MQTT connection failed, rc = " );
       // See https://pubsubclient.knolleary.net/api.html#state for the failure code explanation.
@@ -36,7 +36,7 @@ void MQTT::loop() {
   }
   client.loop();
 }
-
-void MQTT::publish(const char* topic, const char* payload) {
-  client.publish(topic, payload);
+void MQTT::publish(const char* topic, float payload) {
+  if (payload == 0 || isnan(payload)) return;
+  client.publish(topic, (String("field1=") + String(payload)).c_str());
 }

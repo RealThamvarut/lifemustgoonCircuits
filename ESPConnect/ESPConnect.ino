@@ -24,16 +24,12 @@
 #define RX1 44
 #define TX1 43
 
-// Define Pump pin
-// #define pumpPin 5
-
-
 // Define I2C pins
 #define SDA_PIN  8
 #define SCL_PIN  9
 
 // Define Weight pin
-#define W_PIN 15
+#define W_PIN 18
 
 // Define Temp pin
 #define T_PIN 16
@@ -60,7 +56,6 @@ void setup()
   lcd.backlight();
   lcd.clear();
 
-  // pinMode(pumpPin, OUTPUT); // set water-pump trigger
   pinMode(W_PIN, INPUT);
   temp.begin();
 }
@@ -80,9 +75,14 @@ void loop()
   
   // lcd.clear();
   // lcd.setCursor(0,0); 
-  // lcd.print("Water Lv:" + String(dist) + "%   ");
-  // lcd.setCursor(0,1); 
-  // lcd.print("Temp:" + String(celcius) + " C   ");
+  // lcd.print("Press the button");
+  // lcd.setCursor(0,1);
+  // lcd.print("or tab the card");
+  lcd.setCursor(0,0);
+  lcd.print("Wight");
+  lcd.setCursor(0,1);
+  lcd.print(weight);
+  // Serial2.println(weight);
 
   // Serial2.print("Distance: ");
   // Serial2.println(dist);
@@ -95,64 +95,66 @@ void loop()
   //
   // Serial2.println("-----------------------------------");
   
-  // lcd.clear();
-  // lcd.setCursor(0,0); 
-  // lcd.print("Water Lv:" + String(dist) + "%   ");
-  // lcd.setCursor(0,1); 
-  // lcd.print("Temp:" + String(celcius) + " C   ");
   //
   //  end of log
   
-  mqtt.publish(MQTT_TOPIC_WATER_LEVEL, ("field1=" + String(dist)).c_str());
-  mqtt.publish(MQTT_TOPIC_TEMPERATURE, ("field1=" + String(celcius)).c_str());
+  mqtt.publish(MQTT_TOPIC_WATER_LEVEL, dist);
+  mqtt.publish(MQTT_TOPIC_TEMPERATURE, celcius);
 
   String message = "";
 
-  while (Serial2.available() > 0)
+  if (Serial2.available() > 0)
   {
     String command = Serial2.readStringUntil('\n');
     command.trim();
-    if (command == "activate")
+
+    String prefix = "activate:";
+    if (command.startsWith(prefix)) 
     {
-      // lcd.clear();
-      // lcd.setCursor(0,0); 
-      // lcd.print("Place your cup!");
+      String valueString = command.substring(prefix.length());
+        
+      int value = valueString.toInt();
+
+      lcd.clear();
+      lcd.setCursor(0,0); 
+      lcd.print("Place your cup!");
       
-      bool isVibration = waitForTrigger(W_PIN, 5000, 2000);
-      // lcd.clear();
+      bool isVibration = waitForTrigger(W_PIN, 5000, value);
+      lcd.clear();
       if (isVibration){
 
-        // lcd.setCursor(0,0); 
-        // lcd.print("Pumping");
-        // digitalWrite(pumpPin, HIGH);
+        lcd.setCursor(0,0); 
+        lcd.print("Pumping");
 
         unsigned long startTime = millis();
         while ((millis() - startTime) < 5000) {}
 
-        // Serial.println("PUMP active: " + String(weight));
-        // digitalWrite(pumpPin, LOW);
-        // lcd.clear();
+        Serial2.println(true);
+        // Serial2.println("PUMP active: " + String(weight));
+        lcd.clear();
       }
       else{
-        Serial2.println("PUMP not active: " + String(weight));
+        Serial2.println(false);
+        // Serial2.println("PUMP not active: " + String(weight));
       }
 
       weight = 0;
     }
-    else if (command == "deactivate")
-    {
-      // digitalWrite(pumpPin, LOW);
-      Serial2.println("PUMP OFF");
+    else if (command == "invaliduser"){
+      lcd.clear();
+      lcd.setCursor(0,0); 
+      lcd.print("Invalid User");
+      delay(2000);
     }
-    else if (command == "getdata")
-    {
-      dist = sonar.readDistance();
-      weight = analogRead(W_PIN);
-      celcius = temp.getTemperature();
-
-      message = String(dist) + ";" + String(celcius) + ";" + String(weight);
-      Serial2.println(message);
-    }
+    // else if (command == "getdata")
+    // {
+    //   dist = sonar.readDistance();
+    //   weight = analogRead(W_PIN);
+    //   celcius = temp.getTemperature();
+    //
+    //   message = String(dist) + ";" + String(celcius) + ";" + String(weight);
+    //   Serial2.println(message);
+    // }
     else if (command == "");
     else
     {

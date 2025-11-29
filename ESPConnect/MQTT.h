@@ -9,7 +9,7 @@ public:
     MQTT(const char* server, int port, const char* user, const char* password, const char* client_id);
     void setup();
     void loop();
-    void publish(const char* topic, const char* payload);
+    void publish(const char* topic, const float payload);
 
 private:
     void reconnect();
