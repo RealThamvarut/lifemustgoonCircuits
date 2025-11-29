@@ -1,0 +1,6 @@
+Flask
+Pillow 
+gunicorn
+transformers
+torch
+numpy
