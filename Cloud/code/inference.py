@@ -3,7 +3,7 @@ import torch
 import base64
 import io
 from PIL import Image
-from transformers import AutoImageProcessor, AutoModel
+from transformers import AutoImageProcessor, AutoModel, AutoConfig
 
 def model_fn(model_dir):
     """
@@ -15,7 +15,8 @@ def model_fn(model_dir):
     
     #load processor
     processor = AutoImageProcessor.from_pretrained("abhilash88/age-gender-prediction", trust_remote_code=True)
-    model = AutoModel.from_pretrained("abhilash88/age-gender-prediction", trust_remote_code=True).to(device)
+    config = AutoConfig.from_pretrained("abhilash88/age-gender-prediction", trust_remote_code=True)
+    model = AutoModel.from_pretrained("abhilash88/age-gender-prediction", config=config, trust_remote_code=True).to(device)
     if device != -1:
         model.eval()
     
