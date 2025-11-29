@@ -65,7 +65,7 @@ def predict_fn(input_object, context):
         gender_maps = ['Female', 'Male']
         predicted_gender_idx = gender_probs.argmax()
         predicted_gender = gender_maps[predicted_gender_idx]
-        confidence = float(probs[predicted_gender_idx])
+        confidence = float(gender_probs[predicted_gender_idx])
 
     return {
         "age": round(predicted_age, 1),
