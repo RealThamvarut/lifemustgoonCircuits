@@ -3,7 +3,7 @@ import torch
 import base64
 import io
 from PIL import Image
-from transformers import pipeline
+from transformers import AutoImageProcessor, AutoModel
 
 def model_fn(model_dir):
     """
@@ -13,15 +13,14 @@ def model_fn(model_dir):
     device = 0 if torch.cuda.is_available() else -1
     print(f"Loading model to device: {device}")
     
-    # We load the pipeline directly from the Hub.
-    # 'trust_remote_code=True' is required because this model uses a custom architecture.
-    pipe = pipeline(
-        "age-gender-classification", 
-        model="abhilash88/age-gender-prediction", 
-        trust_remote_code=True,
-        device=device
-    )
-    return pipe
+    #load processor
+    processor = AutoImageProcessor.from_pretrained("abhilash88/age-gender-prediction", trust_remote_code=True)
+    model = AutoModel.from_pretrained("abhilash88/age-gender-prediction", trust_remote_code=True).to(device)
+    if device != -1:
+        model.eval()
+    
+    return {"model": model, "processor": processor, "device": device}
+    
 
 def input_fn(request_body, request_content_type):
     """
@@ -40,13 +39,38 @@ def input_fn(request_body, request_content_type):
 
     raise ValueError(f"Unsupported content type: {request_content_type}")
 
-def predict_fn(input_object, model):
+def predict_fn(input_object, context):
     """
     Run the prediction on the decoded input.
     """
-    # The pipeline handles the inference details
-    prediction = model(input_object)
-    return prediction
+    model = context['model']
+    processor = context['processor']
+    device = context['device']
+    
+    input = processor(images=input_object, return_tensors="pt")
+    
+    if device != -1:
+        input = {k: v.to(device) for k, v in input.items()}
+        
+    with torch.no_grad():
+        outputs = model(**input)
+        
+        age_logits = outputs.age_logits if hasattr(outputs, 'age_logits') else outputs['age_logits']
+        gender_logits = outputs.gender_logits if hasattr(outputs, 'gender_logits') else outputs['gender_logits']
+        
+        predicted_age = float(age_logits.item())
+        
+        gender_probs = torch.softmax(gender_logits, dim=1).cpu().numpy()[0]
+        gender_maps = ['Female', 'Male']
+        predicted_gender_idx = gender_probs.argmax()
+        predicted_gender = gender_maps[predicted_gender_idx]
+        confidence = float(probs[predicted_gender_idx])
+
+    return {
+        "age": round(predicted_age, 1),
+        "gender": predicted_gender,
+        "gender_confidence": round(confidence, 3)
+    }
 
 def output_fn(prediction, response_content_type):
     """
