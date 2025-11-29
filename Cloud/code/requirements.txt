@@ -1,5 +1,0 @@
-insightface
-opencv-python-headless
-onnxruntime
-numpy
-torch
