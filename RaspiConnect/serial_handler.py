@@ -8,7 +8,6 @@ class ESP32:
         self.waterLevel = None
         self.temperature = None
         self.weight = None
-        self.getSensor()
 
     def getSensor(self):
         send_command("getdata")

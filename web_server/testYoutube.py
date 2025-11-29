@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-from getUrl import get_youtube_link_from_cloud
 
 app = Flask(__name__)
 
@@ -18,12 +17,6 @@ def ad():
         elif "youtu.be/" in youtube_url:
             video_id = youtube_url.split("youtu.be/")[1]
     return render_template("ad.html", video_id=video_id)
-
-# def play_video():
-#     cloud_api = "https://your-cloud-server.com/api/getVideo"
-#     video_id = get_youtube_link_from_cloud(cloud_api)
-
-#     return render_template("index.html", video_id=video_id)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

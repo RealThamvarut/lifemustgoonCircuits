@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pi Webcam Stream</title>
+    <style>
+        button {
+            font-size: 24px;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <h1>Live Stream</h1>
+        <img src="{{ url_for('video_feed') }}" width="1366" height="768">
+    </div>
+    <script>
+    function checkAdTrigger() {
+        fetch("/check_ad")
+            .then(r => r.json())
+            .then(data => {
+                if (data.ad === true) {
+                    window.location.href = "/ad";
+                }
+            });
+    }
+
+    // check every 1 second
+    setInterval(checkAdTrigger, 1000);
+    </script>
+</body>
+</html>

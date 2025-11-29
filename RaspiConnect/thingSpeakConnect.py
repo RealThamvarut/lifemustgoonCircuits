@@ -1,27 +1,25 @@
-import paho.mqtt.client as mqtt
+import paho.mqtt.publish as publish
 
-CHANNEL_ID = 3185468
-MQTT_SERVER = "mqtt3.thingspeak.com"
-MQTT_PORT = 1883
-MQTT_USER = "LwEPGy4rLh4tMhMDLQwgBwc"
-MQTT_PASSWORD = "/dhZK/IMhUvop5mPCqhQqm4h"
-MQTT_CLIENT_ID = "LwEPGy4rLh4tMhMDLQwgBwc"
-MQTT_TOPIC = "channels/3185468/publish"
+# The ThingSpeak Channel ID.
+channel_ID = "3186112"
+# The hostname of the ThingSpeak MQTT broker.
+mqtt_host = "mqtt3.thingspeak.com"
+# Your MQTT credentials for the device
+mqtt_client_ID = "LwEPGy4rLh4tMhMDLQwgBwc"
+mqtt_username  = "LwEPGy4rLh4tMhMDLQwgBwc"
+mqtt_password  = "/dhZK/IMhUvop5mPCqhQqm4h"
+# Use unsecure tcp port
+t_transport = "tcp"
+t_port = 1883
+# Create the topic string.
+topic = "channels/" + channel_ID + "/publish"
 
+def send_to_thingspeak(uid):
+    payload = "field1=" + str(uid)
 
-def init_mqtt():
-    client = mqtt.Client(MQTT_CLIENT_ID)
-
-    client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
-
-    client.connect(MQTT_SERVER, MQTT_PORT, 60)
-
-    print(f"MQTT Connected to {MQTT_SERVER} as {MQTT_CLIENT_ID}")
-    return client
-
-
-def send_to_thingspeak(uid, client):
-    payload = f"field1={uid}"
-
-    client.publish(MQTT_TOPIC, payload)
-    print(f"Sent to ThingSpeak → Topic: {MQTT_TOPIC}, Payload: {payload}")
+    # attempt to publish this data to the topic.
+    try:
+        print ("Writing Payload = ", payload," to host: ", mqtt_host, " clientID= ", mqtt_client_ID, " User ", mqtt_username, " PWD ", mqtt_password)
+        publish.single(topic, payload, hostname=mqtt_host, transport=t_transport, port=t_port, client_id=mqtt_client_ID, auth={'username':mqtt_username,'password':mqtt_password})
+    except Exception as e:
+        print (e) 

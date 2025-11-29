@@ -35,3 +35,10 @@ class Led:
         self.setLed("yellow", 0)
         self.blinkLed("red", delay)
         self.setLed("yellow", 1)
+
+    def cleanup(self):
+        """Turn off all LEDs and release GPIO resources."""
+        for color in self.led_pins.keys():
+            self.setLed(color, 0)
+        lgpio.gpiochip_close(self.gpioController)
+        print("LED GPIO resources released.")

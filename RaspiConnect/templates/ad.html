@@ -28,10 +28,24 @@
             z-index: 9999;
             background: transparent;
         }
+
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 28px;
+            border-radius: 8px;
+            z-index: 10000;
+        }
     </style>
 </head>
 <body>
     <div id="video-container">
+        <div id="timer">{{ duration_seconds }}</div>
+        
         <video id="ad-video" width="1366" height="768" autoplay muted>
             <source src="{{ url_for('serve_video', filename=video_filename) }}" type="video/mp4">
             Your browser does not support the video tag.
@@ -41,14 +55,23 @@
 
     <script>
         const video = document.getElementById('ad-video');
+        let timeLeft = Number("{{ duration_seconds }}") || 0;
+        const timerDisplay = document.getElementById("timer");
+
+        // Countdown timer
+        const countdown = setInterval(function() {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+            }
+        }, 1000);
 
         // Redirect to home when video ends
         video.onended = function() {
             window.location.href = "/";
         };
     </script>
-    <form action="/ad" method="post">
-        <button type="submit">Play</button>
-    </form>
 </body>
 </html>
