@@ -4,18 +4,8 @@ from sagemaker import get_execution_role
 from sagemaker.pytorch import PyTorchModel
 
 role = get_execution_role()
-sess = sagemaker.Session()
-bucket = sess.default_bucket()
 
-tarFile = 'model.tar.gz'
-s3 = boto3.client('s3')
-s3.upload_file(
-    FileName=tarFile,
-    Bucket=bucket,
-    Key=os.path.basename(tarFile)
-)
-
-model_uri = f"s3://{bucket}/{os.path.basename(tarFile)}"
+model_uri = f"s3://"
 entryPoint = "inference.py"
 
 model = PyTorchModel(
