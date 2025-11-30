@@ -143,6 +143,8 @@ if __name__ == "__main__":
                     
                     if response == "1" or not esp32:
                         activate_pump(5)
+                    time.sleep(1)
+                    led.greenOff()
                 except requests.exceptions.RequestException as e:
                     print(f"Failed to trigger ad: Could not connect to web server. {e}")
                 time.sleep(0.5)  # Debounce for button

@@ -12,13 +12,13 @@ from picamera2 import Picamera2
 app = Flask(__name__)
 
 AI_API_URL = "http://ec2-18-140-57-238.ap-southeast-1.compute.amazonaws.com:5000/predict"
-VIDEO_PATH = "/home/admin/Documents/lifemustgoonCircuits/RaspiConnect/videos"
+VIDEO_PATH = "/home/admin/Documents/lifemustgoonCircuits/RaspiConnect/cache_videos"
 
 ad_triggered = False
 
 current_ad_state = {
     "triggered": False,
-    "video_filename": "ad_video.mp4", #default ad'
+    "video_filename": "b0099-001.mp4", #default ad'
     "duration": 5.0
 }
 
