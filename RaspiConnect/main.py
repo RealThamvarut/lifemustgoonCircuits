@@ -104,9 +104,23 @@ if __name__ == "__main__":
                     r = requests.post("http://127.0.0.1:5000/trigger_ad")
                     print("Ad trigger response:", r.text)
                     time.sleep(float(get_video_duration_opencv()))
+                    command = "activate:3000"
+                    response = None
+                    if esp32:
+                        try:
+                            send_command(command)
+                            response = receive_data()
+                            print("Log from ESP32:", response)
+                        except Exception as e:
+                            print(f"Error communicating with ESP32: {e}")
+                    
+                    if response == "1" or not esp32:
+                        activate_pump(5)
                 except requests.exceptions.RequestException as e:
                     print(f"Failed to trigger ad: Could not connect to web server. {e}")
                 time.sleep(0.5)  # Debounce for button
+                
+
 
             time.sleep(0.1)
 
