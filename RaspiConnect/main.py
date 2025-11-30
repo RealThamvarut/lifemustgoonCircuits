@@ -1,8 +1,8 @@
-from RaspiConnect.localpicamera import capture_frame_base64, get_video_duration_opencv, start_camera, stop_camera
+from localpicamera import capture_frame_base64, start_camera, stop_camera
 from serial_handler import ESP32, send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
 from read_card import RC522CardReader
-from flaskWebServer import create_app, infer_demographics
+from flaskWebServer import create_app, infer_demographics, get_video_duration_opencv
 from thingSpeakConnect import send_to_thingspeak
 from led import Led
 import time
@@ -127,8 +127,10 @@ if __name__ == "__main__":
 
                 try:
                     r = requests.post("http://127.0.0.1:5000/trigger_ad", json=demographics)
-                    print("Ad trigger response:", r.text)
-                    time.sleep(float(get_video_duration_opencv()))
+                    r = r.json()
+                    print("Ad trigger response:", r["video_filename"])
+                    time.sleep(float(get_video_duration_opencv(r["video_filename"])))
+                    led.greenOn()
                     command = "activate:3000"
                     response = None
                     if esp32:

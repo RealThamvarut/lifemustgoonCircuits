@@ -6,12 +6,12 @@ from flask import Flask, Response, jsonify, render_template, request, send_from_
 import random
 
 import requests
-from RaspiConnect.localpicamera import generate_frames, get_video_duration_opencv, start_camera
+from localpicamera import generate_frames, start_camera
 from picamera2 import Picamera2
 
 app = Flask(__name__)
 
-AI_API_URL = "http://ec2-18-141-164-183.ap-southeast-1.compute.amazonaws.com:5000/predict"
+AI_API_URL = "http://ec2-18-140-57-238.ap-southeast-1.compute.amazonaws.com:5000/predict"
 VIDEO_PATH = "/home/admin/Documents/lifemustgoonCircuits/RaspiConnect/videos"
 
 ad_triggered = False
@@ -38,7 +38,7 @@ def infer_demographics(img_base64: str):
         )
 
         if response.status_code == 200:
-            return response
+            return response.json()
         else:
             print("Return code not 200")
             return None
@@ -87,7 +87,7 @@ def create_app():
     def trigger_ad():
         global current_ad_state
         
-        data = request.json() or {}
+        data = request.json or {}
         gender = data.get("gender", "Male")
         age = data.get("age", 25)
 
