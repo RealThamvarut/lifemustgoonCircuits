@@ -6,7 +6,12 @@ from flask import Flask, Response, jsonify, render_template, request, send_from_
 import random
 
 import requests
+<<<<<<< HEAD
 from localpicamera import generate_frames, start_camera
+=======
+from RaspiConnect.adsmatcher import AdMatcher
+from RaspiConnect.localpicamera import generate_frames, start_camera
+>>>>>>> eb000e5 (add ads matching:)
 from picamera2 import Picamera2
 
 app = Flask(__name__)
@@ -31,12 +36,14 @@ def infer_demographics(img_base64: str):
             "image":img_base64
         }
 
+        print("Sending image to AI API for inference...")
         response = requests.post(
             AI_API_URL,
             headers=headers,
             json=payload
         )
 
+        print("Response received from AI API.")
         if response.status_code == 200:
             return response.json()
         else:
@@ -74,6 +81,8 @@ def create_app():
     global ad_triggered
     global current_ad_state
 
+    adsmatcher = AdMatcher() #init rules for ad selection
+
     @app.route('/')
     def index():
         return render_template('index.html')
@@ -91,7 +100,7 @@ def create_app():
         gender = data.get("gender", "Male")
         age = data.get("age", 25)
 
-        selected_video = "ad_video.mp4"
+        selected_video = adsmatcher.select_ad(gender, age)
         duration = get_video_duration_opencv(selected_video)  # returns timedelta
 
         current_ad_state = {
