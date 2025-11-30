@@ -1,56 +1,54 @@
+import base64
 import cv2
 import time
 import datetime
-from flask import Flask, Response, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request, send_from_directory
 import random
+
+import requests
+from RaspiConnect.localpicamera import generate_frames, get_video_duration_opencv, start_camera
 from picamera2 import Picamera2
 
 app = Flask(__name__)
 
-# Camera setup
-picam2 = None
+AI_API_URL = "http://ec2-18-141-164-183.ap-southeast-1.compute.amazonaws.com:5000/predict"
 VIDEO_PATH = "/home/admin/Documents/lifemustgoonCircuits/RaspiConnect/videos"
 
-# initialize camera
-def start_camera():
-    global picam2
+ad_triggered = False
 
-    if picam2 is not None:
-        return  # Already started
+current_ad_state = {
+    "triggered": False,
+    "video_filename": "ad_video.mp4", #default ad'
+    "duration": 5.0
+}
 
-    picam2 = Picamera2()
-    video_cfg = picam2.create_video_configuration(
-        main={"size": (1280, 720), "format": "XRGB8888"},
-        buffer_count=3
-    )
-    picam2.configure(video_cfg)
-    picam2.start()
-    time.sleep(5)  # Warm-up
+def infer_demographics(img_base64: str):
+    try:
+        headers = {
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "image":img_base64
+        }
 
-# stop camer
-def stop_camera():
-    global picam2
+        response = requests.post(
+            AI_API_URL,
+            headers=headers,
+            json=payload
+        )
 
-    if picam2:
-        picam2.stop()
-        picam2 = None
-
-
-# frame generator
-def generate_frames():
-    global picam2
-
-    while picam2 is not None:
-        frame = picam2.capture_array()
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
+        if response.status_code == 200:
+            return response
+        else:
+            print("Return code not 200")
+            return None
+    except Exception as e:
+        print(f"Connection error : {e}")
+        return None
+    
 # Estimate video duration
-def get_video_duration_opencv():
-    filename = f"{VIDEO_PATH}/ad_video.mp4"
+def get_video_duration_opencv(video_name):
+    filename = f"{VIDEO_PATH}/{video_name}"
     video = cv2.VideoCapture(filename)
     if not video.isOpened():
         print(f"Error: Could not open video file {filename}")
@@ -67,14 +65,15 @@ def get_video_duration_opencv():
     video.release()
     return duration_seconds
 
-# Flask app factory (CALLABLE FROM main.py)
-ad_triggered = False  # global state
+
+
 
 def create_app():
 
     app = Flask(__name__)
     global ad_triggered
-    
+    global current_ad_state
+
     @app.route('/')
     def index():
         return render_template('index.html')
@@ -86,28 +85,45 @@ def create_app():
     
     @app.route("/trigger_ad", methods=["POST"])
     def trigger_ad():
-        global ad_triggered
-        ad_triggered = True
-        return "OK"
+        global current_ad_state
+        
+        data = request.json() or {}
+        gender = data.get("gender", "Male")
+        age = data.get("age", 25)
+
+        selected_video = "ad_video.mp4"
+        duration = get_video_duration_opencv(selected_video)  # returns timedelta
+
+        current_ad_state = {
+            "triggered": True,
+            "video_filename": selected_video,
+            "duration": duration
+        }
+
+        return jsonify({
+            "status": "ok",
+            "video_filename": selected_video,
+            "duration": duration
+        })
     
     @app.route("/check_ad")
     def check_ad():
-        global ad_triggered
-        return {"ad": ad_triggered}
+        global current_ad_state
+        return jsonify({"ad": current_ad_state["triggered"]})
     
     @app.route("/ad", methods=["GET", "POST"])
     def ad():
-        global ad_triggered
-        ad_triggered = False
-        video_filename = "ad_video.mp4"
-        duration = get_video_duration_opencv()  # returns timedelta
+        global current_ad_state
+        current_ad_state["triggered"] = False
+        video_filename = current_ad_state["video_filename"]
+        duration = current_ad_state["duration"]  # returns timedelta
 
         duration_seconds = int(duration)
 
         return render_template(
             "ad.html",
             video_filename=video_filename,
-            duration_seconds=duration_seconds
+            duration_seconds=duration_seconds+1  # add 1 second buffer
         )
 
     @app.route("/videos/<path:filename>")

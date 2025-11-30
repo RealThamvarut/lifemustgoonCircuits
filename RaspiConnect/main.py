@@ -1,7 +1,8 @@
+from RaspiConnect.localpicamera import capture_frame_base64, get_video_duration_opencv, start_camera, stop_camera
 from serial_handler import ESP32, send_command, receive_data, close_serial
 from databaseConnect import connectDB, getUser
 from read_card import RC522CardReader
-from flaskWebServer import start_camera, stop_camera, get_video_duration_opencv, create_app
+from flaskWebServer import create_app, infer_demographics
 from thingSpeakConnect import send_to_thingspeak
 from led import Led
 import time
@@ -98,10 +99,34 @@ if __name__ == "__main__":
                     except Exception as e:
                         print(f"Error communicating with ESP32: {e}")
                     led.redOn(delay=2)
-            if lgpio.gpio_read(h, BUTTON_PIN):
-                print("Button was pushed! Triggering ad.")
+            
+            
+            
+            
+            if lgpio.gpio_read(h, BUTTON_PIN): 
+                print("Button was pushed! Infering face from camera")
+                
+
+                #capture demographics from camera
+                frame = capture_frame_base64()
+                if frame is None:
+                    print("Failed to capture frame for inference.")
+                    continue
+                demographics = infer_demographics(frame)
+                
+                if demographics is None:
+                    print("Inference failed; play default ad.")
+                    demographics = {
+                        "age": 25,
+                        "gender": "Male",
+                        "confidence": "100%"
+                    }
+                else:
+                    print("Demographics inferred:", demographics)
+
+
                 try:
-                    r = requests.post("http://127.0.0.1:5000/trigger_ad")
+                    r = requests.post("http://127.0.0.1:5000/trigger_ad", json=demographics)
                     print("Ad trigger response:", r.text)
                     time.sleep(float(get_video_duration_opencv()))
                     command = "activate:3000"
